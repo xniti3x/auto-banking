@@ -15,3 +15,8 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+/src/generated/
+src/test/resources/transactions.json
+spring-shell.log
+.vscode/settings.json
