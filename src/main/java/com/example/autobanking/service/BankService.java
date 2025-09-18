@@ -1,6 +1,7 @@
 package com.example.autobanking.service;
 
 import com.example.autobanking.entity.Token;
+import com.example.autobanking.entity.TransactionEntity;
 import com.example.autobanking.entity.User;
 import com.example.autobanking.mapper.TransactionMapper;
 import com.example.autobanking.repository.TransactionRepository;
@@ -123,17 +124,22 @@ public class BankService {
 
     public void fetchTransactions(User user) {
         try {
-            Token token = user.getToken();
-            if (!isValidAccess(token)) { // token valid ? refresh or get new one
+            
+            if (!isValidAccess(user.getToken())) { // token valid ? refresh or get new one
                 System.out.println("token expired!");
-                if (isValidRefresh(token)) {
+                if (isValidRefresh(user.getToken())) {
                     getTokenFromRefresh(user);
                 } else {
                     getNewToken(user);
                 }
             }
 
-            apiClient.setBearerToken(token.getAccess());
+	        if(user.getToken() == null || user.getToken().getAccess()==null){
+                System.out.println("could not obtain or refresh token: check for crrect secretId and secretKey");
+                return;
+            }
+
+            apiClient.setBearerToken(user.getToken().getAccess());
             System.out.println("Time: " + LocalDateTime.now().toString());
             System.out.println("Running automation for requisitionId =" + user.getRequisitionId());
 
@@ -146,10 +152,13 @@ public class BankService {
             }
 
             for (UUID acc : accounts) {
-                AccountTransactions accountTransactions = accountsApi.retrieveAccountTransactions(acc.toString(), null,null);
+                String accountId = acc.toString();
+                AccountTransactions accountTransactions = accountsApi.retrieveAccountTransactions(accountId, null,null);
                 System.out.println("transaction fetched successfull for AccountId: " + acc + " Time: "+ LocalDateTime.now());
                 for (TransactionSchema tx : accountTransactions.getTransactions().getBooked()) {
-                    transactionRepository.save(transactionMapper.toEntity(tx));
+                    TransactionEntity entity = transactionMapper.toEntity(tx);
+                    entity.setInternalAccountId(accountId);
+                    transactionRepository.save(entity);
                 }
             }
             this.errorCounter=3;
@@ -163,7 +172,7 @@ public class BankService {
         try {
             System.out.println("fetching new token...");
             JWTObtainPairRequest newRequest = new JWTObtainPairRequest();
-            newRequest.setSecretId(user.getSecretKey());
+            newRequest.setSecretKey(user.getSecretKey());
             newRequest.setSecretId(user.getSecretId());
             SpectacularJWTObtain obtainNewAccessRefreshTokenPair = tokenApi.obtainNewAccessRefreshTokenPair(newRequest);
             Token newToken = new Token();

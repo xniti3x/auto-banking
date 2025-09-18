@@ -32,6 +32,7 @@ public class TransactionEntity {
     private String debtorAgent;
     private String internalTransactionId;
     private String ultimateCreditor;
+    private String internalAccountId;
     
     @Column(name = "account_type")
     @Enumerated(EnumType.STRING)

@@ -1,5 +1,6 @@
 package com.example.autobanking.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +11,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Token {
+    @Column(length = 2048)
     private String access;
-    private LocalDateTime createdAt;
+    @Column(length = 2048)
     private String refresh;
+    private LocalDateTime createdAt;
 }

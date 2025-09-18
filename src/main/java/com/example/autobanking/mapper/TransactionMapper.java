@@ -32,9 +32,11 @@ public interface TransactionMapper {
         if(dto.getDebtorAccount()!=null){
             tEntity.setAccountType(AccountType.DEBTOR);
             tEntity.setAccountTypeName(dto.getDebtorName());
+            if(dto.getDebtorAccount()!=null) tEntity.setIban(dto.getDebtorAccount().getIban());
         }else{
             tEntity.setAccountType(AccountType.CREDITOR);
             tEntity.setAccountTypeName(dto.getCreditorName());
+            if(dto.getCreditorAccount()!=null) tEntity.setIban(dto.getCreditorAccount().getIban());
         }
 
         return tEntity;
