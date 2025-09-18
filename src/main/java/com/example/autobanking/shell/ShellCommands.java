@@ -6,7 +6,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 import java.util.Scanner;
-import java.util.UUID;
 
 @ShellComponent
 @RequiredArgsConstructor
@@ -35,14 +34,13 @@ public class ShellCommands {
 
     @ShellMethod(key = "automation-enable", value = "Enable automation")
     public String enableAutomation() {
-        bankService.toggleAutomation(true);
-        return "Automation enabled.";
+        
+        return bankService.toggleAutomation(true);
     }
 
     @ShellMethod(key = "automation-disable", value = "Disable automation")
     public String disableAutomation() {
-        bankService.toggleAutomation(false);
-        return "Automation disabled.";
+        return bankService.toggleAutomation(false);
     }
 
     @ShellMethod(key = "metadata", value = "Show metadata placeholder")

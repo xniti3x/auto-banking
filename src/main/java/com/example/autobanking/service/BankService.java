@@ -40,7 +40,10 @@ public class BankService {
     private final ApiClient apiClient;
     private final TokenApi tokenApi;
 
-    public BankService(UserRepository userRepository, TransactionMapper transactionMapper, TransactionRepository transactionRepository) {
+    private int errorCounter = 3;
+
+    public BankService(UserRepository userRepository, TransactionMapper transactionMapper,
+            TransactionRepository transactionRepository) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.transactionMapper = transactionMapper;
@@ -72,53 +75,65 @@ public class BankService {
                 secretKey: %s
                 secretId: %s
                 requisitionId: %s
-                token valid: %s
+                access token valid: %s
+                refresh token valid: %s
                 automation: %s
                 """.formatted(
                 user.getSecretKey() != null,
                 user.getSecretId() != null,
                 user.getRequisitionId() != null,
-                user.getToken() != null && user.getToken().getAccess() != null,
+                isValidAccess(user.getToken()),
+                isValidRefresh(user.getToken()),
                 user.isAutomationEnabled());
     }
 
-    public void toggleAutomation(boolean enable) {
+    public String toggleAutomation(boolean enable) {
+        String info = "No user setup yet.";
         User user = userRepository.findById(1L).orElse(null);
         if (user == null) {
-            System.out.println("No user setup yet.");
-            return;
+            return info;
         }
         user.setAutomationEnabled(enable);
-
+        userRepository.save(user);
         if (enable) {
+            info = "Automation enabled.";
             startAutomation(user);
         } else {
+            info = "Automation disabled.";
             stopAutomation();
         }
+
+        return info;
     }
 
     private void startAutomation(User user) {
         if (automationTask == null || automationTask.isCancelled()) {
             automationTask = scheduler.scheduleAtFixedRate(() -> {
-                fetchTransactions(user);
-            }, 0, 6, TimeUnit.HOURS);
+                if(errorCounter <= 0){
+                    System.out.println("to many errors, you can do it manualy.");
+                    toggleAutomation(false);
+                    this.errorCounter=3;
+                    System.exit(0);
+                }else{
+                    fetchTransactions(user);
+                }
+            }, 0, 8, TimeUnit.HOURS);
         }
     }
 
     public void fetchTransactions(User user) {
-        Token token = user.getToken();
-        if (!isValidAccess(token)) { // token valid ? refresh or get new one
-            System.out.println("token expired!");
-            if (isValidRefresh(token)) {
-                getTokenFromRefresh(user);
-            } else {
-                getNewToken(user);
-            }
-        }
-
-        apiClient.setBearerToken(token.getAccess());
-
         try {
+            Token token = user.getToken();
+            if (!isValidAccess(token)) { // token valid ? refresh or get new one
+                System.out.println("token expired!");
+                if (isValidRefresh(token)) {
+                    getTokenFromRefresh(user);
+                } else {
+                    getNewToken(user);
+                }
+            }
+
+            apiClient.setBearerToken(token.getAccess());
             System.out.println("Time: " + LocalDateTime.now().toString());
             System.out.println("Running automation for requisitionId =" + user.getRequisitionId());
 
@@ -131,15 +146,16 @@ public class BankService {
             }
 
             for (UUID acc : accounts) {
-                AccountTransactions accountTransactions = accountsApi.retrieveAccountTransactions(acc.toString(), null,
-                        null);
-                System.out.println("transaction fetched successfull for AccountId: " + acc);
+                AccountTransactions accountTransactions = accountsApi.retrieveAccountTransactions(acc.toString(), null,null);
+                System.out.println("transaction fetched successfull for AccountId: " + acc + " Time: "+ LocalDateTime.now());
                 for (TransactionSchema tx : accountTransactions.getTransactions().getBooked()) {
                     transactionRepository.save(transactionMapper.toEntity(tx));
                 }
             }
-        } catch (ApiException e) {
-            e.printStackTrace();
+            this.errorCounter=3;
+        }catch(Exception e){
+            this.errorCounter--;
+            System.out.println("something bad happened!/n" + e.getMessage());
         }
     }
 
@@ -150,9 +166,11 @@ public class BankService {
             newRequest.setSecretId(user.getSecretKey());
             newRequest.setSecretId(user.getSecretId());
             SpectacularJWTObtain obtainNewAccessRefreshTokenPair = tokenApi.obtainNewAccessRefreshTokenPair(newRequest);
-            user.getToken().setAccess(obtainNewAccessRefreshTokenPair.getAccess());
-            user.getToken().setRefresh(obtainNewAccessRefreshTokenPair.getRefresh());
-            user.getToken().setCreatedAt(LocalDateTime.now());
+            Token newToken = new Token();
+            newToken.setAccess(obtainNewAccessRefreshTokenPair.getAccess());
+            newToken.setRefresh(obtainNewAccessRefreshTokenPair.getRefresh());
+            newToken.setCreatedAt(LocalDateTime.now());
+            user.setToken(newToken);
             userRepository.save(user);
             apiClient.setBearerToken(obtainNewAccessRefreshTokenPair.getAccess());
         } catch (ApiException e) {
