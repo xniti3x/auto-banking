@@ -6,4 +6,5 @@ import com.example.autobanking.entity.TransactionEntity;
 
 public interface TransactionRepository extends JpaRepository<TransactionEntity,Long> {
 
+     boolean existsByTransactionId(String transactionId);
 }

@@ -6,9 +6,15 @@ import com.example.autobanking.entity.User;
 import com.example.autobanking.mapper.TransactionMapper;
 import com.example.autobanking.repository.TransactionRepository;
 import com.example.autobanking.repository.UserRepository;
+import com.google.gson.Gson;
+
 import jakarta.annotation.PreDestroy;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileReader;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -155,16 +161,28 @@ public class BankService {
                 String accountId = acc.toString();
                 AccountTransactions accountTransactions = accountsApi.retrieveAccountTransactions(accountId, null,null);
                 System.out.println("transaction fetched successfull for AccountId: " + acc + " Time: "+ LocalDateTime.now());
-                for (TransactionSchema tx : accountTransactions.getTransactions().getBooked()) {
-                    TransactionEntity entity = transactionMapper.toEntity(tx);
-                    entity.setInternalAccountId(accountId);
-                    transactionRepository.save(entity);
-                }
+                saveTransactions(accountId, accountTransactions);
             }
             this.errorCounter=3;
         }catch(Exception e){
             this.errorCounter--;
             System.out.println("something bad happened!/n" + e.getMessage());
+        }
+    }
+
+    private void saveTransactions(String accountId, AccountTransactions accountTransactions) {
+        for (TransactionSchema tx : accountTransactions.getTransactions().getBooked()) {
+            TransactionEntity entity = transactionMapper.toEntity(tx);
+            entity.setInternalAccountId(accountId);
+
+            // Check if transaction already exists
+            boolean exists = transactionRepository.existsByTransactionId(entity.getTransactionId());
+            if (exists) {
+                System.out.println("Transaction already exists: " + entity.getTransactionId());
+                continue; // skip saving
+            }
+
+            transactionRepository.save(entity);
         }
     }
 
@@ -231,5 +249,27 @@ public class BankService {
         }
         LocalDateTime expiryTime = token.getCreatedAt().plusSeconds(REFRESH_EXPIRES);
         return LocalDateTime.now().isBefore(expiryTime);
+    }
+    
+    public User findUser(){
+        return userRepository.findById(1l).orElse(null);
+    }
+
+    @Autowired Gson gson;
+    public void importJson(String filePath) {
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            System.out.println("File not found: " + filePath);
+        }
+
+        try (FileReader reader = new FileReader(file)) {
+            AccountTransactions accountTransactions = gson.fromJson(reader, AccountTransactions.class);
+            saveTransactions("json-importer", accountTransactions);
+            System.out.println("json transactions imported successfully.");
+        }catch(Exception e){
+            e.printStackTrace();
+            System.out.println("failed to import json.");
+        }
     }
 }

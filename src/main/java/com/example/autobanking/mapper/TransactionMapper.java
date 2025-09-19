@@ -10,7 +10,6 @@ import org.openapitools.client.model.TransactionSchema;
 import org.springframework.stereotype.Service;
 
 @Mapper(componentModel = "spring")
-@Service
 public interface TransactionMapper {
 
     default TransactionEntity toEntity(TransactionSchema dto) {
