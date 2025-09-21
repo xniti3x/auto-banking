@@ -40,6 +40,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
     stdin_open: true
     tty: true
+    volumes:
+      - ./json-import:/json-import
 
 volumes:
   mysql_data:

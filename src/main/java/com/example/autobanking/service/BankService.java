@@ -31,6 +31,7 @@ import org.openapitools.client.model.JWTObtainPairRequest;
 import org.openapitools.client.model.JWTRefreshRequest;
 import org.openapitools.client.model.Requisition;
 import org.openapitools.client.model.SpectacularJWTObtain;
+import org.openapitools.client.model.SpectacularJWTRefresh;
 import org.openapitools.client.model.TransactionSchema;
 
 @Service
@@ -141,7 +142,7 @@ public class BankService {
             }
 
 	        if(user.getToken() == null || user.getToken().getAccess()==null){
-                System.out.println("could not obtain or refresh token: check for crrect secretId and secretKey");
+                System.out.println("could not obtain or refresh token: check for correct secretId and secretKey");
                 return;
             }
 
@@ -196,7 +197,8 @@ public class BankService {
             Token newToken = new Token();
             newToken.setAccess(obtainNewAccessRefreshTokenPair.getAccess());
             newToken.setRefresh(obtainNewAccessRefreshTokenPair.getRefresh());
-            newToken.setCreatedAt(LocalDateTime.now());
+            newToken.setAccessCreatedAt(LocalDateTime.now());
+            newToken.setRefreshCreatedAt(LocalDateTime.now());
             user.setToken(newToken);
             userRepository.save(user);
             apiClient.setBearerToken(obtainNewAccessRefreshTokenPair.getAccess());
@@ -210,7 +212,10 @@ public class BankService {
             System.out.println("refreshing token...");
             JWTRefreshRequest refreshRequest = new JWTRefreshRequest();
             refreshRequest.setRefresh(user.getToken().getRefresh());
-            tokenApi.getANewAccessToken(refreshRequest);
+            SpectacularJWTRefresh aNewAccessToken = tokenApi.getANewAccessToken(refreshRequest);
+            user.getToken().setAccess(aNewAccessToken.getAccess());
+            user.getToken().setAccessCreatedAt(LocalDateTime.now());
+            userRepository.save(user);
         } catch (ApiException e) {
             e.printStackTrace();
         }
@@ -239,7 +244,7 @@ public class BankService {
         if (token == null || token.getAccess() == null || token.getAccess().isBlank()) {
             return false;
         }
-        LocalDateTime expiryTime = token.getCreatedAt().plusSeconds(ACCESS_EXPIRES);
+        LocalDateTime expiryTime = token.getAccessCreatedAt().plusSeconds(ACCESS_EXPIRES);
         return LocalDateTime.now().isBefore(expiryTime);
     }
 
@@ -247,7 +252,7 @@ public class BankService {
         if (token == null || token.getRefresh() == null || token.getRefresh().isBlank()) {
             return false;
         }
-        LocalDateTime expiryTime = token.getCreatedAt().plusSeconds(REFRESH_EXPIRES);
+        LocalDateTime expiryTime = token.getRefreshCreatedAt().plusSeconds(REFRESH_EXPIRES);
         return LocalDateTime.now().isBefore(expiryTime);
     }
     

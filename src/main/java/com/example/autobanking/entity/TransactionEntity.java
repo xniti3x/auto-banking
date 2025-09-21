@@ -30,7 +30,7 @@ public class TransactionEntity {
     private String debtorAgent;
     private String internalTransactionId;
     private String ultimateCreditor;
-    private String internalAccountId;
+    private String internalAccountId; //Account UUID fetched via requisitionsApi -> requisitionById
     
     @Column(name = "account_type")
     @Enumerated(EnumType.STRING)

@@ -15,5 +15,7 @@ public class Token {
     private String access;
     @Column(length = 2048)
     private String refresh;
-    private LocalDateTime createdAt;
+    private LocalDateTime accessCreatedAt;
+    private LocalDateTime refreshCreatedAt;
+    
 }

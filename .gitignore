@@ -17,6 +17,5 @@ buildNumber.properties
 .classpath
 
 /src/generated/
-src/test/resources/transactions.json
 spring-shell.log
 .vscode/settings.json

@@ -1,0 +1,83 @@
+{
+  "transactions": {
+    "booked": [
+      {
+        "transactionId": "8421ae72111c1a1078d2b8ed64f02894",
+        "entryReference": "2025-09-13-11.25.20.153776",
+        "bookingDate": "2025-09-15",
+        "valueDate": "2025-09-15",
+        "transactionAmount": {
+          "amount": "2085.00",
+          "currency": "EUR"
+        },
+        "debtorName": "BMW",
+        "debtorAccount": {
+          "iban": "DE49640500000100133774"
+        },
+        "additionalInformation": "GUTSCHR. UEBERWEISUNG",
+        "proprietaryBankTransactionCode": "NTRF+166+9310+000-DK",
+        "creditorAgent": "SOLADES1REU",
+        "debtorAgent": "SOLADES1REU",
+        "internalTransactionId": "50166f88a18f28b9705049fa102b3dd7"
+      },
+      {
+        "transactionId": "aaa1df76477d1e2278d2b8aaaaaaa894",
+        "entryReference": "2025-09-13-11.25.20.153776",
+        "bookingDate": "2025-09-15",
+        "valueDate": "2025-09-15",
+        "transactionAmount": {
+          "amount": "-25.00",
+          "currency": "EUR"
+        },
+        "creditorName": "BMW",
+        "creditorAccount": {
+          "iban": "DE49600000000100100000"
+        },
+        "additionalInformation": "GUTSCHR. UEBERWEISUNG",
+        "proprietaryBankTransactionCode": "NABC+236+9110+000-DK",
+        "creditorAgent": "DRESDEM8DRE",
+        "debtorAgent": "DRESDEM8DRE",
+        "internalTransactionId": "50166f88bbbb28bcc0cC049fa10bb3dd7"
+      }
+    ],
+    "pending": [
+      {
+        "transactionId": "c957ef7beadaaaaa6a08ebbbbb300c3e",
+        "entryReference": "2025-09-12-08.30.56.014365",
+        "endToEndId": "1000006009 S202203022",
+        "mandateId": "0222-000000001009",
+        "bookingDate": "2025-09-16",
+        "valueDate": "2025-09-12",
+        "transactionAmount": {
+          "amount": "-369.11",
+          "currency": "EUR"
+        },
+        "creditorName": "Mercedes",
+        "creditorAccount": {
+          "iban": "DE55505400000150105505"
+        },
+        "remittanceInformationStructured": "rnNr. 2025-23123",
+        "additionalInformation": "FOLGELASTSCHRIFT",
+        "proprietaryBankTransactionCode": "NDDT+105+4440+222-DK",
+        "creditorAgent": "COBDDVBB",
+        "debtorAgent": "DRESDEM8DRE"
+      },
+      {
+        "transactionId": "aaaaa08e0cbbbbbb592ec2660233a7f8",
+        "entryReference": "2025-09-13-16.09.24.086541",
+        "bookingDate": "2025-09-15",
+        "transactionAmount": {
+          "amount": "-152.15",
+          "currency": "EUR"
+        },
+        "creditorAccount": {},
+        "remittanceInformationStructured": "EC 11315151 131925122254P03",
+        "additionalInformation": "SONSTIGER EINZUG",
+        "proprietaryBankTransactionCode": "EDOL+006+0000+000-EN",
+        "creditorAgent": "0",
+        "debtorAgent": "14011000"
+      }
+    ]
+  },
+  "last_updated": "2025-09-13T18:51:35.048912Z"
+}
