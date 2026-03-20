@@ -2,9 +2,10 @@ package com.example.autobanking.shell;
 
 import com.example.autobanking.entity.User;
 import com.example.autobanking.service.BankService;
-
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+
+import org.openapitools.client.model.Requisition;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
@@ -67,6 +68,22 @@ public class ShellCommands {
         bankService.importJson(filePath);    
     }
 
+    @ShellMethod(key = {"fetch transaction", "ft","7"}, value = "fetch transaction manually")
+    public void fetchTransactions() {
+        bankService.fetchTransactions(bankService.findUser());    
+    }
+
+    @ShellMethod(key = {"createNewAgreement", "ca","8"}, value = "createNewAgreement manually")
+    public void createNewAgreement() {
+        bankService.createNewAgreement(bankService.findUser());    
+    }
+
+    @ShellMethod(key = {"getlastrequisition", "glr","9"}, value = "get last requisition")
+    public void getLastRequisition() {
+        Requisition lastRequisition = bankService.getLastRequisition(bankService.findUser());   
+
+        System.out.println(lastRequisition.toString());
+    }
     @ShellMethod(value = "Show welcome message", key = {"welcome", "w"})
     public String welcome() {
         return """

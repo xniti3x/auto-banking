@@ -3251,7 +3251,8 @@ components:
           maxLength: 256
         accounts:
           type: array
-          items: {}
+          items:
+            type: string
           readOnly: true
           default: []
           description: array of account IDs retrieved within a scope of this requisition

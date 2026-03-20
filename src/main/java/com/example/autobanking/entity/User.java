@@ -17,6 +17,9 @@ public class User {
     private String secretId;
     private String secretKey;
     private String requisitionId;
+    private String agreementId;
+    private String agreement_expiration_date;
+
     @Embedded
     private Token token;
     private boolean automationEnabled = false;

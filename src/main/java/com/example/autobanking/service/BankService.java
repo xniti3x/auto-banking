@@ -15,7 +15,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,14 +29,22 @@ import java.util.concurrent.*;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.AccountsApi;
+import org.openapitools.client.api.AgreementsApi;
 import org.openapitools.client.api.RequisitionsApi;
 import org.openapitools.client.api.TokenApi;
 import org.openapitools.client.model.AccountTransactions;
+import org.openapitools.client.model.EndUserAgreement;
+import org.openapitools.client.model.EndUserAgreementRequest;
 import org.openapitools.client.model.JWTObtainPairRequest;
 import org.openapitools.client.model.JWTRefreshRequest;
+import org.openapitools.client.model.PaginatedEndUserAgreementList;
+import org.openapitools.client.model.PaginatedRequisitionList;
 import org.openapitools.client.model.Requisition;
+import org.openapitools.client.model.RequisitionRequest;
 import org.openapitools.client.model.SpectacularJWTObtain;
 import org.openapitools.client.model.SpectacularJWTRefresh;
+import org.openapitools.client.model.SpectacularRequisition;
+import org.openapitools.client.model.StatusEnum;
 import org.openapitools.client.model.TransactionSchema;
 
 @Service
@@ -44,11 +57,14 @@ public class BankService {
     private final TransactionMapper transactionMapper;
     private final TransactionRepository transactionRepository;
     private final RequisitionsApi requisitionsApi;
+    private final AgreementsApi agreementsApi;
     private final AccountsApi accountsApi;
     private final ApiClient apiClient;
     private final TokenApi tokenApi;
 
     private int errorCounter = 3;
+    private final int ACCESS_EXPIRES = 86400;
+    private final int REFRESH_EXPIRES = 2592000;
 
     public BankService(UserRepository userRepository, TransactionMapper transactionMapper,
             TransactionRepository transactionRepository) {
@@ -58,6 +74,7 @@ public class BankService {
 
         apiClient = new ApiClient();
         requisitionsApi = new RequisitionsApi(apiClient);
+        agreementsApi = new AgreementsApi(apiClient);
         accountsApi = new AccountsApi(apiClient);
         tokenApi = new TokenApi(apiClient);
     }
@@ -117,12 +134,12 @@ public class BankService {
     private void startAutomation(User user) {
         if (automationTask == null || automationTask.isCancelled()) {
             automationTask = scheduler.scheduleAtFixedRate(() -> {
-                if(errorCounter <= 0){
+                if (errorCounter <= 0) {
                     System.out.println("to many errors, you can do it manualy.");
                     toggleAutomation(false);
-                    this.errorCounter=3;
+                    this.errorCounter = 3;
                     System.exit(0);
-                }else{
+                } else {
                     fetchTransactions(user);
                 }
             }, 0, 8, TimeUnit.HOURS);
@@ -131,7 +148,7 @@ public class BankService {
 
     public void fetchTransactions(User user) {
         try {
-            
+
             if (!isValidAccess(user.getToken())) { // token valid ? refresh or get new one
                 System.out.println("token expired!");
                 if (isValidRefresh(user.getToken())) {
@@ -141,7 +158,7 @@ public class BankService {
                 }
             }
 
-	        if(user.getToken() == null || user.getToken().getAccess()==null){
+            if (user.getToken() == null || user.getToken().getAccess() == null) {
                 System.out.println("could not obtain or refresh token: check for correct secretId and secretKey");
                 return;
             }
@@ -157,18 +174,86 @@ public class BankService {
                 System.out.println("no accounts found for " + user.getRequisitionId());
                 return;
             }
-
+            boolean b = false;
+            if(b) return;
             for (UUID acc : accounts) {
                 String accountId = acc.toString();
-                AccountTransactions accountTransactions = accountsApi.retrieveAccountTransactions(accountId, null,null);
-                System.out.println("transaction fetched successfull for AccountId: " + acc + " Time: "+ LocalDateTime.now());
+                AccountTransactions accountTransactions = accountsApi.retrieveAccountTransactions(accountId, null,
+                        null);
+                System.out.println(
+                        "transaction fetched successfull for AccountId: " + acc + " Time: " + LocalDateTime.now());
                 saveTransactions(accountId, accountTransactions);
             }
-            this.errorCounter=3;
-        }catch(Exception e){
+            this.errorCounter = 3;
+        } catch (ApiException e) {
             this.errorCounter--;
             System.out.println("something bad happened!/n" + e.getMessage());
+            if (e.getCode() == 401) { // agreement expire
+                System.out.println("seems like agreement has expire, i try to create a new one");
+                createNewAgreement(user);
+                fetchTransactions(user);
+                System.out.println("agrement creation and fetching was successfull");
+            } else {
+                e.printStackTrace();
+            }
         }
+    }
+
+    public void createNewAgreement(User user) {
+        EndUserAgreementRequest request = new EndUserAgreementRequest();
+        request.setAccessScope(Arrays.asList("balances", "details", "transactions"));
+        request.setAccessValidForDays(90);
+        request.setInstitutionId("KSK_REUTLINGEN_SOLADES1REU");
+        request.setMaxHistoricalDays(360);
+        try {
+            PaginatedEndUserAgreementList allAgreements = agreementsApi.retrieveAllAgreements(Integer.MAX_VALUE, 0);
+            EndUserAgreement euaAgreement = allAgreements.getResults().stream().filter(eag -> eag.getAccepted() == null)
+                    .findFirst().get();
+
+            if (euaAgreement == null) {
+                euaAgreement = agreementsApi.createEUA(request);
+            } else {                        
+                RequisitionRequest requisitionRequest = new RequisitionRequest();
+                requisitionRequest.setAgreement(euaAgreement.getId());
+                requisitionRequest.setRedirect(new URI("https://www.google.de"));
+                requisitionRequest.setInstitutionId(euaAgreement.getInstitutionId());
+                SpectacularRequisition specRequisition = requisitionsApi.createRequisition(requisitionRequest);
+
+                user.setAgreementId(specRequisition.getAgreement().toString());
+                user.setAgreement_expiration_date(LocalDate.now().plusMonths(3).toString());
+                user.setRequisitionId(specRequisition.getId().toString());
+                System.out.println(specRequisition.toString());
+            }
+
+        } catch (ApiException | URISyntaxException ex) {
+            // TODO Auto-generated catch block
+            ex.printStackTrace();
+        }
+    }
+
+    private void retrieveAllRequisitions(){
+        try{
+            PaginatedRequisitionList allRequisitions = requisitionsApi.retrieveAllRequisitions(Integer.MAX_VALUE,0);
+                Requisition requisition = allRequisitions.getResults().stream()
+                .filter(r -> r.getAccounts().isEmpty())
+                .filter(r -> r.getStatus() == StatusEnum.CR)
+                .sorted(Comparator.comparing(Requisition::getCreated).reversed())
+                .findFirst()
+                .get();
+            }catch(ApiException e){
+                e.printStackTrace();
+            }
+    }
+
+    public Requisition getLastRequisition(User user){
+
+        try {
+            return requisitionsApi.requisitionById(UUID.fromString(user.getRequisitionId()));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void saveTransactions(String accountId, AccountTransactions accountTransactions) {
@@ -237,9 +322,6 @@ public class BankService {
         scheduler.shutdown();
     }
 
-    private int ACCESS_EXPIRES = 86400;
-    private int REFRESH_EXPIRES = 2592000;
-
     private boolean isValidAccess(Token token) {
         if (token == null || token.getAccess() == null || token.getAccess().isBlank()) {
             return false;
@@ -255,12 +337,14 @@ public class BankService {
         LocalDateTime expiryTime = token.getRefreshCreatedAt().plusSeconds(REFRESH_EXPIRES);
         return LocalDateTime.now().isBefore(expiryTime);
     }
-    
-    public User findUser(){
+
+    public User findUser() {
         return userRepository.findById(1l).orElse(null);
     }
 
-    @Autowired Gson gson;
+    @Autowired
+    Gson gson;
+
     public void importJson(String filePath) {
         File file = new File(filePath);
 
@@ -272,7 +356,7 @@ public class BankService {
             AccountTransactions accountTransactions = gson.fromJson(reader, AccountTransactions.class);
             saveTransactions("json-importer", accountTransactions);
             System.out.println("json transactions imported successfully.");
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("failed to import json.");
         }
