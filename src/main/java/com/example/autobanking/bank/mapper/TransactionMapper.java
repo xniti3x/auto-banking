@@ -1,13 +1,11 @@
-package com.example.autobanking.mapper;
-
-import com.example.autobanking.entity.TransactionEntity;
-import com.example.autobanking.entity.TransactionEntity.AccountType;
+package com.example.autobanking.bank.mapper;
 
 import java.math.BigDecimal;
 
 import org.mapstruct.Mapper;
 import org.openapitools.client.model.TransactionSchema;
-import org.springframework.stereotype.Service;
+import com.example.autobanking.bank.entity.TransactionEntity;
+import com.example.autobanking.bank.entity.TransactionEntity.AccountType;
 
 @Mapper(componentModel = "spring")
 public interface TransactionMapper {

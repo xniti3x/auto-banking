@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.example.autobanking.entity.TransactionEntity;
-import com.example.autobanking.mapper.TransactionMapper;
-import com.example.autobanking.mapper.TransactionMapperImpl;
-import com.example.autobanking.repository.TransactionRepository;
+import com.example.autobanking.bank.entity.TransactionEntity;
+import com.example.autobanking.bank.mapper.TransactionMapper;
+import com.example.autobanking.bank.repository.TransactionRepository;
+import com.example.autobanking.bank.mapper.TransactionMapperImpl;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;

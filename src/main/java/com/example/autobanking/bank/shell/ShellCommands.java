@@ -1,7 +1,8 @@
-package com.example.autobanking.shell;
+/*package com.example.autobanking.bank.shell;
 
-import com.example.autobanking.entity.User;
-import com.example.autobanking.service.BankService;
+import com.example.autobanking.bank.entity.User;
+import com.example.autobanking.bank.service.BankService;
+
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +19,7 @@ public class ShellCommands {
 
     private final BankService bankService;
 
-    @PostConstruct
+    //@PostConstruct
     public void runAtStartup() {
         System.out.println(welcome());
         User user = bankService.findUser();
@@ -132,3 +133,4 @@ public class ShellCommands {
     }
 
 }
+*/

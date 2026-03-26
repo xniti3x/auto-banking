@@ -1,11 +1,11 @@
-package com.example.autobanking.service;
+/*package com.example.autobanking.bank.service;
 
-import com.example.autobanking.entity.Token;
-import com.example.autobanking.entity.TransactionEntity;
-import com.example.autobanking.entity.User;
-import com.example.autobanking.mapper.TransactionMapper;
-import com.example.autobanking.repository.TransactionRepository;
-import com.example.autobanking.repository.UserRepository;
+import com.example.autobanking.auth.repository.UserRepository;
+import com.example.autobanking.bank.entity.Token;
+import com.example.autobanking.bank.entity.TransactionEntity;
+import com.example.autobanking.bank.entity.User;
+import com.example.autobanking.bank.mapper.TransactionMapper;
+import com.example.autobanking.bank.repository.TransactionRepository;
 import com.google.gson.Gson;
 
 import jakarta.annotation.PreDestroy;
@@ -362,3 +362,4 @@ public class BankService {
         }
     }
 }
+*/

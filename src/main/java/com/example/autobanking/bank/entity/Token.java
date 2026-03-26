@@ -1,4 +1,4 @@
-package com.example.autobanking.entity;
+package com.example.autobanking.bank.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
