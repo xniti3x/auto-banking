@@ -16,9 +16,8 @@ public class RequisitionsService {
 
     private final RequisitionsApi requisitionsApi;
 
-    public RequisitionsService() {
-        ApiClient client = new ApiClient();
-        this.requisitionsApi = new RequisitionsApi(client);
+    public RequisitionsService(RequisitionsApi requisitionsApi) {
+        this.requisitionsApi = requisitionsApi;
     }
 
     public PaginatedRequisitionList listRequisitions(int limit,int offset) throws ApiException {

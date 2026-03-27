@@ -1,5 +1,6 @@
 package com.example.autobanking.institutions.controller;
 
+import com.example.autobanking.institutions.dto.InstitutionFilterDto;
 import com.example.autobanking.institutions.service.InstitutionsService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,8 +25,8 @@ public class InstitutionsController {
 
     // GET /institutions/
     @GetMapping
-    public List<Integration> listInstitutions(String accessScopesSupported, String accountSelectionSupported, String businessAccountsSupported, String cardAccountsSupported, String corporateAccountsSupported, String country, String pendingTransactionsSupported, String privateAccountsSupported, String readDebtorAccountSupported, String readRefundAccountSupported, String separateContinuousHistoryConsentSupported, String ssnVerificationSupported) throws ApiException {
-        return institutionsService.listInstitutions(accessScopesSupported,accountSelectionSupported,businessAccountsSupported,cardAccountsSupported,corporateAccountsSupported,country,pendingTransactionsSupported,privateAccountsSupported,readDebtorAccountSupported,readRefundAccountSupported,separateContinuousHistoryConsentSupported,ssnVerificationSupported);
+    public List<Integration> listInstitutions(InstitutionFilterDto institutionFilter) throws ApiException {
+        return institutionsService.listInstitutions(institutionFilter);
     }
 
     // GET /institutions/{id}/

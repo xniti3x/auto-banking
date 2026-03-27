@@ -1,6 +1,5 @@
 package com.example.autobanking.agreements.service;
 
-import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.AgreementsApi;
 import org.openapitools.client.model.EndUserAgreement;
@@ -17,9 +16,8 @@ public class AgreementsService {
 
     private final AgreementsApi agreementsApi;
 
-    public AgreementsService() {
-        ApiClient client = new ApiClient();
-        this.agreementsApi = new AgreementsApi(client);
+    public AgreementsService(AgreementsApi agreementsApi) {
+        this.agreementsApi = agreementsApi;
     }
 
     // GET /agreements/enduser/

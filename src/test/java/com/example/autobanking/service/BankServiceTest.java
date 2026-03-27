@@ -7,16 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.openapitools.client.model.AccountTransactions;
 import org.openapitools.client.model.TransactionSchema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.example.autobanking.bank.entity.TransactionEntity;
-import com.example.autobanking.bank.mapper.TransactionMapper;
-import com.example.autobanking.bank.repository.TransactionRepository;
-import com.example.autobanking.bank.mapper.TransactionMapperImpl;
+import com.example.autobanking.transactions.entity.TransactionEntity;
+import com.example.autobanking.transactions.mapper.TransactionMapper;
+import com.example.autobanking.transactions.mapper.TransactionMapperImpl;
+import com.example.autobanking.transactions.repository.TransactionRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -65,7 +66,7 @@ class BankServiceTest {
 
         List<TransactionSchema> booked = accountTransactions.getTransactions().getBooked();
         List<TransactionEntity> entities = new ArrayList<>();
-        TransactionMapper tMapper = new TransactionMapperImpl();
+        TransactionMapper tMapper = Mappers.getMapper(TransactionMapper.class);
         for (TransactionSchema tx : booked) {
             TransactionEntity entity = tMapper.toEntity(tx);
             entities.add(transactionRepository.save(entity));

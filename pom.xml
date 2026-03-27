@@ -40,13 +40,6 @@
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
-        <!-- Spring Shell -->
-        <dependency>
-            <groupId>org.springframework.shell</groupId>
-            <artifactId>spring-shell-starter</artifactId>
-            <version>3.2.2</version>
-        </dependency>
-
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
