@@ -13,6 +13,6 @@ public class UserGoCardlessDetailsDto {
     private Long id;
     private String institutionId;
     private String requisitionId;
-    private String agreementId;
+    private String endUserAgreementId;
     private LocalDateTime agreementExpDate;
 }

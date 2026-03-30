@@ -1,8 +1,5 @@
 package com.example.autobanking.users.service;
 
-import java.util.Optional;
-
-import org.mapstruct.factory.Mappers;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,20 +14,30 @@ import jakarta.transaction.Transactional;
 @Service
 public class UserGoCardlessDetailsService {
     
-        private final UserGoCardlessDetailsRepository userGoCardlessDetailsRepository;
+    private final UserGoCardlessDetailsRepository userGoCardlessDetailsRepository;
+    private final UserGoCardlessDetailsMapper mapper;
 
-    public UserGoCardlessDetailsService(UserGoCardlessDetailsRepository userGoCardlessDetailsRepository) {
+    public UserGoCardlessDetailsService(
+            UserGoCardlessDetailsRepository userGoCardlessDetailsRepository,
+            UserGoCardlessDetailsMapper mapper) {
         this.userGoCardlessDetailsRepository = userGoCardlessDetailsRepository;
+        this.mapper = mapper;
     }
 
-    @Transactional
-    public void updateGoCardlessDetailsForLoggedInUser(UserGoCardlessDetailsDto userGoCardlessDetailsDto) {
-        Optional<UserGoCardlessDetails> details = userGoCardlessDetailsRepository.findById(userGoCardlessDetailsDto.getId());
-        details.ifPresent(dt->{
-            UserGoCardlessDetailsMapper mapper = Mappers.getMapper(UserGoCardlessDetailsMapper.class);
-            userGoCardlessDetailsRepository.save(mapper.toEntity(userGoCardlessDetailsDto));
-    });
-    }
+@Transactional
+public void updateGoCardlessDetailsForLoggedInUser(UserGoCardlessDetailsDto dto) {
+
+    UserGoCardlessDetails existing = userGoCardlessDetailsRepository
+        .findByUsername(getLoggedInUsername())
+        .orElseThrow(() -> new RuntimeException("User details not found"));
+
+    existing.setAgreementExpDate(dto.getAgreementExpDate());
+    existing.setEndUserAgreementId(dto.getEndUserAgreementId());
+    existing.setInstitutionId(dto.getInstitutionId());
+    existing.setRequisitionId(dto.getRequisitionId());
+
+    userGoCardlessDetailsRepository.save(existing);
+}
     
     private String getLoggedInUsername() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -39,5 +46,12 @@ public class UserGoCardlessDetailsService {
         } else {
             return principal.toString();
         }
+    }
+
+    public UserGoCardlessDetailsDto getUserGoCardlessDetails() {
+    return userGoCardlessDetailsRepository
+        .findByUsername(getLoggedInUsername())
+        .map(mapper::toDto)
+        .orElseThrow(() -> new RuntimeException("User details not found"));
     }
 }
