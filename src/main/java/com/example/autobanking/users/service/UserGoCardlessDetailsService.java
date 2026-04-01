@@ -1,5 +1,6 @@
 package com.example.autobanking.users.service;
 
+import com.example.autobanking.users.entity.User;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -15,20 +16,22 @@ import jakarta.transaction.Transactional;
 public class UserGoCardlessDetailsService {
     
     private final UserGoCardlessDetailsRepository userGoCardlessDetailsRepository;
+    private final UserService userService;
     private final UserGoCardlessDetailsMapper mapper;
 
     public UserGoCardlessDetailsService(
             UserGoCardlessDetailsRepository userGoCardlessDetailsRepository,
+            UserService userService,
             UserGoCardlessDetailsMapper mapper) {
         this.userGoCardlessDetailsRepository = userGoCardlessDetailsRepository;
+        this.userService = userService;
         this.mapper = mapper;
     }
 
 @Transactional
 public void updateGoCardlessDetailsForLoggedInUser(UserGoCardlessDetailsDto dto) {
 
-    UserGoCardlessDetails existing = userGoCardlessDetailsRepository
-        .findByUsername(getLoggedInUsername())
+    UserGoCardlessDetails existing = userService.findByUsernme(userService.getLoggedInUsername()).map(user -> user.getGoCardlessDetails())
         .orElseThrow(() -> new RuntimeException("User details not found"));
 
     existing.setAgreementExpDate(dto.getAgreementExpDate());
@@ -38,20 +41,10 @@ public void updateGoCardlessDetailsForLoggedInUser(UserGoCardlessDetailsDto dto)
 
     userGoCardlessDetailsRepository.save(existing);
 }
-    
-    private String getLoggedInUsername() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        } else {
-            return principal.toString();
-        }
-    }
 
     public UserGoCardlessDetailsDto getUserGoCardlessDetails() {
-    return userGoCardlessDetailsRepository
-        .findByUsername(getLoggedInUsername())
-        .map(mapper::toDto)
+    return userService.findByUsernme(userService.getLoggedInUsername())
+        .map(u->mapper.toDto(u.getGoCardlessDetails()))
         .orElseThrow(() -> new RuntimeException("User details not found"));
     }
 }

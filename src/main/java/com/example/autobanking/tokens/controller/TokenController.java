@@ -32,7 +32,7 @@ public class TokenController {
 
     // POST /token/refresh/
     @PostMapping("/refresh")
-    public Token refreshToken(@RequestBody Token request) throws ApiException {
-        return tokenService.refreshToken(request);
+    public Token refreshToken() throws ApiException {
+        return tokenService.refreshToken();
     }
 }

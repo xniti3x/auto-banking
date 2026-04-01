@@ -23,7 +23,7 @@ public class UserController {
         this.userGoCardlessDetailsService = userGoCardlessDetailsService;
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public ResponseEntity<String> updateGoCardlessDetailsForLoggedInUser(@RequestBody UserGoCardlessDetailsDto userGoCardlessDetailsDto) {
 
         userGoCardlessDetailsService.updateGoCardlessDetailsForLoggedInUser(userGoCardlessDetailsDto);
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping
-    public UserGoCardlessDetailsDto getUserGoCardlessDetails() throws ApiException {
+    public UserGoCardlessDetailsDto getUserGoCardlessDetails() {
         return userGoCardlessDetailsService.getUserGoCardlessDetails();
     }
 }

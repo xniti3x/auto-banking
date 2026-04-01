@@ -1,4 +1,4 @@
-package com.example.autobanking.configs;
+package com.example.autobanking.configs.gson;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -10,6 +10,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,21 @@ public class GsonConfiguration {
             public JsonElement serialize(OffsetDateTime src, Type typeOfSrc, 
                     JsonSerializationContext context) {
                 return new JsonPrimitive(src.toString());
+            }
+        })
+
+        .registerTypeAdapter(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
+            @Override
+            public JsonElement serialize(LocalDateTime src, Type typeOfSrc,
+                                         JsonSerializationContext context) {
+                return new JsonPrimitive(src.toString());
+            }
+        })
+        .registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+            @Override
+            public LocalDateTime deserialize(JsonElement json, Type typeOfT,
+                                             JsonDeserializationContext context) {
+                return LocalDateTime.parse(json.getAsString());
             }
         })
         .create();

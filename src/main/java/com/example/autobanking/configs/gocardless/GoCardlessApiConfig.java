@@ -1,4 +1,4 @@
-package com.example.autobanking.configs;
+package com.example.autobanking.configs.gocardless;
 
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.api.AccountsApi;

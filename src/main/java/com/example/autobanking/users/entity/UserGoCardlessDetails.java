@@ -37,6 +37,9 @@ public class UserGoCardlessDetails {
     private String endUserAgreementId;
     private String requisitionId;
     private String institutionId;
+    private String accountId;
     private LocalDateTime agreementExpDate;
+
+    private boolean automationEnabled;
 
 }
