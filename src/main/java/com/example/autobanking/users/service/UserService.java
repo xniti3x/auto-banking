@@ -1,7 +1,6 @@
 package com.example.autobanking.users.service;
 
 import com.example.autobanking.users.entity.User;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,5 +34,9 @@ public class UserService {
         } else {
             return principal.toString();
         }
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
     }
 }

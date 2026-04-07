@@ -7,17 +7,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class AutomationScheduler {
 
-    private final ConfigService configService;
     private final AutomationService service;
 
-    public AutomationScheduler(ConfigService configService, AutomationService service) {
-        this.configService = configService;
+    public AutomationScheduler(AutomationService service) {
         this.service = service;
     }
 
     @Scheduled(fixedRate = 4 * 60 * 60 * 1000)
     public void run() throws ApiException {
-        if (!configService.isAutomationEnabled()) {
+        if (!service.isAutomationEnabled()) {
             return;
         }
         service.executeAutomation();
