@@ -19,3 +19,6 @@ buildNumber.properties
 /src/generated/
 spring-shell.log
 .vscode/settings.json
+.env
+application-local.properties
+json-import/

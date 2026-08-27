@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>auto-banking</artifactId>
+    <artifactId>gocardless-bank-data-bridge</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>auto-banking</name>
+    <name>gocardless-bank-data-bridge</name>
 
     <properties>
         <java.version>17</java.version>
@@ -187,23 +187,25 @@
 
     <build>
         <plugins>
-            
-            <plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- OpenAPI Generator Plugin (manual execution) -->
+            <!-- Generate the GoCardless client from the upstream OpenAPI specification. -->
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <version>7.12.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-gocardless-client</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
                     <generatorName>java</generatorName>
